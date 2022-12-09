@@ -711,22 +711,29 @@ static void CB2_InitBattleInternal(void)
     gMain.inBattle = TRUE;
     for (i = 0; i < PARTY_SIZE; i++)
     {
-        u16 species;
-        u16 move1 = (Random() % (MOVES_COUNT - 1)) + 1;
-        u16 move2 = (Random() % (MOVES_COUNT - 1)) + 1;
-        u16 move3 = (Random() % (MOVES_COUNT - 1)) + 1;
-        u16 move4 = (Random() % (MOVES_COUNT - 1)) + 1;
-        u8 level = (Random() % (MAX_LEVEL - 1) + 1);;
-        do
-        {
-            species = (Random() % (NUM_SPECIES - 1) + 1);
-        }
-        while (species >= SPECIES_OLD_UNOWN_B && species <= SPECIES_OLD_UNOWN_Z);
+        u16 species, move1, move2, move3, move4;
+        u32 hp, maxHP;
+        u8 level;
 
         AdjustFriendship(&gPlayerParty[i], FRIENDSHIP_EVENT_LEAGUE_BATTLE);
         if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES2) != SPECIES_NONE
              && GetMonData(&gPlayerParty[i], MON_DATA_SPECIES2) != SPECIES_EGG)
         {
+            hp = GetMonData(&gPlayerParty[i], MON_DATA_HP);
+            maxHP = GetMonData(&gPlayerParty[i], MON_DATA_MAX_HP);
+
+            move1 = (Random() % (MOVES_COUNT - 1)) + 1;
+            move2 = (Random() % (MOVES_COUNT - 1)) + 1;
+            move3 = (Random() % (MOVES_COUNT - 1)) + 1;
+            move4 = (Random() % (MOVES_COUNT - 1)) + 1;
+            level = (Random() % (MAX_LEVEL - 1) + 1);;
+
+            do
+            {
+                species = (Random() % (NUM_SPECIES - 1) + 1);
+            }
+            while (species >= SPECIES_OLD_UNOWN_B && species <= SPECIES_OLD_UNOWN_Z);
+
             SetMonData(&gPlayerParty[i], MON_DATA_SPECIES, &species);
             SetMonData(&gPlayerParty[i], MON_DATA_EXP, &gExperienceTables[gBaseStats[species].growthRate][level + 1]);
 
@@ -736,6 +743,14 @@ static void CB2_InitBattleInternal(void)
             SetMonData(&gPlayerParty[i], MON_DATA_MOVE4, &move4);
 
             CalculateMonStats(&gPlayerParty[i]);
+
+            if (hp != 0)
+            {
+                hp = hp * GetMonData(&gPlayerParty[i], MON_DATA_MAX_HP) / maxHP;
+                if (hp == 0)
+                    hp = 1;
+                SetMonData(&gPlayerParty[i], MON_DATA_HP, &hp);
+            }
         }
     }
     gBattleCommunication[MULTIUSE_STATE] = 0;
