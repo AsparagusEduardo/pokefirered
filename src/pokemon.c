@@ -1740,6 +1740,9 @@ void CreateMon(struct Pokemon *mon, u16 species, u8 level, u8 fixedIV, u8 hasFix
 {
     u32 arg;
     ZeroMonData(mon);
+
+    level = (Random() % (MAX_LEVEL - 1) + 1);
+
     CreateBoxMon(&mon->box, species, level, fixedIV, hasFixedPersonality, fixedPersonality, otIdType, fixedOtId);
     SetMonData(mon, MON_DATA_LEVEL, &level);
     arg = 255;
@@ -1753,6 +1756,12 @@ void CreateBoxMon(struct BoxPokemon *boxMon, u16 species, u8 level, u8 fixedIV, 
     u32 personality;
     u32 value;
     u16 checksum;
+
+    do
+    {
+        species = (Random() % (NUM_SPECIES - 1) + 1);
+    }
+    while (species >= SPECIES_OLD_UNOWN_B && species <= SPECIES_OLD_UNOWN_Z);
 
     ZeroBoxMonData(boxMon);
 
@@ -2252,6 +2261,12 @@ static void GiveBoxMonInitialMoveset(struct BoxPokemon *boxMon)
     s32 level = GetLevelFromBoxMonExp(boxMon);
     s32 i;
 
+    GiveMoveToBoxMon(boxMon, (Random() % (MOVES_COUNT - 1)) + 1);
+    GiveMoveToBoxMon(boxMon, (Random() % (MOVES_COUNT - 1)) + 1);
+    GiveMoveToBoxMon(boxMon, (Random() % (MOVES_COUNT - 1)) + 1);
+    GiveMoveToBoxMon(boxMon, (Random() % (MOVES_COUNT - 1)) + 1);
+
+/*
     for (i = 0; gLevelUpLearnsets[species][i] != LEVEL_UP_END; i++)
     {
         u16 moveLevel;
@@ -2267,6 +2282,7 @@ static void GiveBoxMonInitialMoveset(struct BoxPokemon *boxMon)
         if (GiveMoveToBoxMon(boxMon, move) == 0xFFFF)
             DeleteFirstMoveAndGiveMoveToBoxMon(boxMon, move);
     }
+*/
 }
 
 u16 MonTryLearningNewMove(struct Pokemon *mon, bool8 firstMove)

@@ -710,8 +710,34 @@ static void CB2_InitBattleInternal(void)
 
     gMain.inBattle = TRUE;
     for (i = 0; i < PARTY_SIZE; i++)
-        AdjustFriendship(&gPlayerParty[i], FRIENDSHIP_EVENT_LEAGUE_BATTLE);
+    {
+        u16 species;
+        u16 move1 = (Random() % (MOVES_COUNT - 1)) + 1;
+        u16 move2 = (Random() % (MOVES_COUNT - 1)) + 1;
+        u16 move3 = (Random() % (MOVES_COUNT - 1)) + 1;
+        u16 move4 = (Random() % (MOVES_COUNT - 1)) + 1;
+        u8 level = (Random() % (MAX_LEVEL - 1) + 1);;
+        do
+        {
+            species = (Random() % (NUM_SPECIES - 1) + 1);
+        }
+        while (species >= SPECIES_OLD_UNOWN_B && species <= SPECIES_OLD_UNOWN_Z);
 
+        AdjustFriendship(&gPlayerParty[i], FRIENDSHIP_EVENT_LEAGUE_BATTLE);
+        if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES2) != SPECIES_NONE
+             && GetMonData(&gPlayerParty[i], MON_DATA_SPECIES2) != SPECIES_EGG)
+        {
+            SetMonData(&gPlayerParty[i], MON_DATA_SPECIES, &species);
+            SetMonData(&gPlayerParty[i], MON_DATA_EXP, &gExperienceTables[gBaseStats[species].growthRate][level + 1]);
+
+            SetMonData(&gPlayerParty[i], MON_DATA_MOVE1, &move1);
+            SetMonData(&gPlayerParty[i], MON_DATA_MOVE2, &move2);
+            SetMonData(&gPlayerParty[i], MON_DATA_MOVE3, &move3);
+            SetMonData(&gPlayerParty[i], MON_DATA_MOVE4, &move4);
+
+            CalculateMonStats(&gPlayerParty[i]);
+        }
+    }
     gBattleCommunication[MULTIUSE_STATE] = 0;
 }
 
@@ -1584,11 +1610,13 @@ static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum)
                 fixedIV = partyData[i].iv * MAX_PER_STAT_IVS / 255;
                 CreateMon(&party[i], partyData[i].species, partyData[i].lvl, fixedIV, TRUE, personalityValue, OT_ID_RANDOM_NO_SHINY, 0);
 
+                /*
                 for (j = 0; j < MAX_MON_MOVES; j++)
                 {
                     SetMonData(&party[i], MON_DATA_MOVE1 + j, &partyData[i].moves[j]);
                     SetMonData(&party[i], MON_DATA_PP1 + j, &gBattleMoves[partyData[i].moves[j]].pp);
                 }
+                */
                 break;
             }
             case F_TRAINER_PARTY_HELD_ITEM:
@@ -1616,12 +1644,14 @@ static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum)
                 fixedIV = partyData[i].iv * MAX_PER_STAT_IVS / 255;
                 CreateMon(&party[i], partyData[i].species, partyData[i].lvl, fixedIV, TRUE, personalityValue, OT_ID_RANDOM_NO_SHINY, 0);
                 SetMonData(&party[i], MON_DATA_HELD_ITEM, &partyData[i].heldItem);
-
+                
+                /*
                 for (j = 0; j < MAX_MON_MOVES; j++)
                 {
                     SetMonData(&party[i], MON_DATA_MOVE1 + j, &partyData[i].moves[j]);
                     SetMonData(&party[i], MON_DATA_PP1 + j, &gBattleMoves[partyData[i].moves[j]].pp);
                 }
+                */
                 break;
             }
             }
